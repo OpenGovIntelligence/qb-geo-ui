@@ -1,0 +1,95 @@
+<html>
+<head>
+  <title>A Leaflet map!</title>
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+  <style>
+    #map{ height: 100% }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <script>
+
+  // initialize the map
+  var map = L.map('map').setView([55.169, 23.881], 7);
+
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+  		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+  	}).addTo(map);
+  // load a tile layer
+  /*L.tileLayer('http://tiles.mapc.org/basemap/{z}/{x}/{y}.png',
+    {
+      attribution: 'Tiles by <a href="http://mapc.org">MAPC</a>, Data by <a href="http://mass.gov/mgis">MassGIS</a>',
+      maxZoom: 17,
+      minZoom: 9
+    }).addTo(map);*/
+
+  /*  $.ajax({
+        type: "GET",
+        url: "LTUv2.geojson",
+        dataType: "jsonp"
+    }).done(function ( data ) {
+cors(data);
+});
+*/
+    function cors(hoodData){
+      L.geoJson( hoodData, {
+        style: function(feature){
+          var fillColor = "#f7f7f7";
+          return { color: "#0099ff", weight: 1, fillColor: fillColor, fillOpacity: .6 };
+        },
+        onEachFeature: function( feature, layer ){
+          layer.bindPopup( "<strong>" + feature.properties.longName + "</strong><br/>" + feature.properties.name + " " )
+        }
+      }).addTo(map);
+
+    }
+
+  $.getJSON("https://drive.google.com/uc?export=download&id=0B_73K18-R8PPSk1aTktKWmV3NDg",function(hoodData){   cors(hoodData); });
+/*
+  $.getJSON("https://drive.google.com/uc?export=download&id=0B_73K18-R8PPY01XRkFDb2VMcFU",function(data){
+    var ratIcon = L.icon({
+      iconUrl: 'http://www.iconsdb.com/icons/preview/maroon/map-marker-2-xxl.png',
+      iconSize: [40,40]
+    });
+    L.geoJson(data,{
+      pointToLayer: function(feature,latlng){
+        var marker = L.marker(latlng,{icon: ratIcon});
+        marker.bindPopup('Num. of employees: '+feature.properties.employee_number + '<br/>' + 'Year: '+feature.properties.Time_period +'<br/>' +'Economic entities in operation: '+ feature.properties.Economic_entities_in_operation_at_the_beginning_of_the_year_units +'<br/>' + feature.properties.County + '<br/>' +'Municipality: '+ feature.properties.Municipality);
+        return marker;
+      }
+    }).addTo(map);
+  });
+*/
+$.getJSON("https://drive.google.com/uc?export=download&id=0B_73K18-R8PPZnV6YlhOSkFZOTg",function(hoodData){
+ var topLayer = L.geoJson( hoodData, {
+    style: function(feature){
+      var fillColor,
+          density = feature.properties.Economic_entities_in_operation_at_the_beginning_of_the_year_units;
+      if ( density > 80000 ) fillColor = "#f00000";
+      else if ( density > 60000 ) fillColor = "#f20000";
+      else if ( density > 50000 ) fillColor = "#ff4500";
+      else if ( density > 40000 ) fillColor = "#ff6700";
+      else if ( density > 30000 ) fillColor = "#ff8a00";
+      else if ( density > 20000 ) fillColor = "#ff9b00";
+      else if ( density > 10000 ) fillColor = "#ffbe00";
+      else if ( density > 0 ) fillColor = "#ffe000";
+      else fillColor = "#fff200";  // no data
+      return { color: "#999", weight: 1, fillColor: fillColor, fillOpacity: .7 };
+    },
+    onEachFeature: function( feature, layer ){
+      layer.bindPopup( "<strong>" + feature.properties.Municipality + "</strong><br/>" +'Num. of employees: '+feature.properties.employee_number + '<br/>' + 'Year: '+feature.properties.Time_period +'<br/>' +'Economic entities in operation: '+ feature.properties.Economic_entities_in_operation_at_the_beginning_of_the_year_units +'<br/>' + feature.properties.County + '<br/>' +'Municipality: '+ feature.properties.Municipality)
+    }
+  }).addTo(map);
+  topLayer.setZIndex(8);
+
+});
+
+  </script>
+  </body>
+  </html>
